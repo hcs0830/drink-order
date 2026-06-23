@@ -35,7 +35,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC',sans
 .chip{padding:6px 12px;font-size:13px;border:1px solid #d0c8b8;border-radius:20px;cursor:pointer;background:#fdfaf7;color:#5a5040;transition:all .15s;user-select:none}
 .chip.active{background:#e8e0d0;border-color:#2d3b2d;color:#c8d8a8;font-weight:500}
 .chip:hover:not(.active){background:#f0ece4;border-color:#6b8c5a}
-.add-btn{width:100%;padding:10px;font-size:14px;border:1.5px dashed #b0c098;border-radius:10px;background:transparent;color:#4a6c3a;cursor:pointer;margin-top:10px;font-weight:500;transition:background .15s}
+.drink-img-box{margin:10px 0;border-radius:12px;overflow:hidden;background:#f8f5f0;border:1px solid #e0d8cc;display:flex;align-items:center;gap:12px;padding:10px 12px}.drink-img-box img{width:72px;height:90px;object-fit:cover;border-radius:8px;flex-shrink:0}.drink-img-name{font-size:14px;font-weight:600;color:#3a2e20}.drink-img-sub{font-size:11px;color:#8a7a60;margin-top:2px}.add-btn{width:100%;padding:10px;font-size:14px;border:1.5px dashed #b0c098;border-radius:10px;background:transparent;color:#4a6c3a;cursor:pointer;margin-top:10px;font-weight:500;transition:background .15s}
 .add-btn:hover{background:#f0f5ea}
 .order-item{background:#f8f5f0;border:1px solid #e0d8cc;border-radius:10px;padding:10px 40px 10px 12px;margin-bottom:8px;position:relative}
 .order-item .del{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:#fee;border:none;border-radius:50%;width:24px;height:24px;color:#c0392b;cursor:pointer;font-size:16px;line-height:24px;text-align:center;padding:0}
@@ -117,7 +117,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC',sans
     </div>
     <div class="field">
       <label>飲品名稱</label>
-      <select id="item"><option>── 請先選類別 ──</option></select>
+      <select id="item" onchange="showDrinkImg(this.options[this.selectedIndex]?.text?.split('(')[0]?.trim())"><option>── 請先選類別 ──</option></select>
+    </div>
+    <div id="drink-img-box" class="drink-img-box" style="display:none">
+      <img id="drink-img" src="" alt="飲品圖片">
+      <div>
+        <div class="drink-img-name" id="drink-img-label"></div>
+        <div class="drink-img-sub">青山 PeakTea</div>
+      </div>
     </div>
     <div class="row2">
       <div class="field">
@@ -204,6 +211,64 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC',sans
 
 <script>
 const API_URL='https://script.google.com/macros/s/AKfycbzkh9gfcGhAX5kmEbzdVf8wDYH9MZyX3fK6rCzmn3dWB3jMkkR-cftbkGSsUqZ1dmhy/exec';
+const IMG = {
+  "春青":"https://peak-tea.com/wp-content/uploads/2024/09/青山-經典茶飲－青春青-1200x1500-1.jpg",
+  "夏青":"https://peak-tea.com/wp-content/uploads/2024/09/青山-經典茶飲－青夏青-1200x1500-1.jpg",
+  "秋青":"https://peak-tea.com/wp-content/uploads/2024/09/青山-經典茶飲－青秋青-1200x1500-1.jpg",
+  "冬青":"https://peak-tea.com/wp-content/uploads/2024/09/青山-經典茶飲－青冬青-1200x1500-1.jpg",
+  "東方菊花茶":"https://peak-tea.com/wp-content/uploads/2024/08/青山-經典茶飲－無東方菊花茶1200x1500.jpg",
+  "西穀蕎麥茶":"https://peak-tea.com/wp-content/uploads/2024/09/青山-經典茶飲－無西榖蕎麥茶1200x1500.jpg",
+  "南非國寶茶":"https://peak-tea.com/wp-content/uploads/2024/09/青山-經典茶飲－無南非國寶茶1200x1500.jpg",
+  "北風桂花玄米茶":"https://peak-tea.com/wp-content/uploads/2024/09/青山-經典茶飲－無北風桂花玄米茶1200x1500.jpg",
+  "青山綠水":"https://peak-tea.com/wp-content/uploads/2024/08/青山官網-調春山綠水1200x1500.jpg",
+  "春青菊花":"https://peak-tea.com/wp-content/uploads/2024/09/青山官網-調春青菊花1200x1500.jpg",
+  "蕎麥冬露":"https://peak-tea.com/wp-content/uploads/2024/09/青山官網-調蕎麥冬露1200x1500.jpg",
+  "春青冬露":"https://peak-tea.com/wp-content/uploads/2024/09/青山官網-調春青冬露1200x1500.jpg",
+  "菊花冬露":"https://peak-tea.com/wp-content/uploads/2024/09/青山官網-調菊花冬露1200x1500.jpg",
+  "多多綠水":"https://peak-tea.com/wp-content/uploads/2024/09/青山官網-調多多綠水1200x1500.jpg",
+  "菜燕春青":"https://peak-tea.com/wp-content/uploads/2024/08/青山-經典茶飲－料菜燕春青-1200x1500-1.jpg",
+  "杏仁凍春青":"https://peak-tea.com/wp-content/uploads/2024/08/青山-經典茶飲－料杏仁凍春青-1200x1500-1.jpg",
+  "青茶婚貴奶茶":"https://peak-tea.com/wp-content/uploads/2024/08/青山-經典茶飲－料青茶婚貴山峰奶茶-1200x1500-1.jpg",
+  "琥珀珍珠奶茶":"https://peak-tea.com/wp-content/uploads/2024/08/青山-經典茶飲－料琥珀珍珠奶茶-1200x1500-2.jpg",
+  "蕎麥珍珠奶茶":"https://peak-tea.com/wp-content/uploads/2024/08/青山-經典茶飲－料蕎麥珍珠奶茶-1200x1500-1.jpg",
+  "青茶凍天蟬那堤":"https://peak-tea.com/wp-content/uploads/2024/08/青山-經典茶飲－料青茶凍天蟬那堤-1200x1500-1.jpg",
+  "琥珀珍珠天蟬那堤":"https://peak-tea.com/wp-content/uploads/2024/08/青山-經典茶飲－料琥珀珍珠天蟬那堤-1200x1500-1.jpg",
+  "蕎麥珍珠夏青那堤":"https://peak-tea.com/wp-content/uploads/2024/08/青山-經典茶飲－料蕎麥珍珠夏青那堤-1200x1500-1.jpg",
+  "菜燕奶茶":"https://peak-tea.com/wp-content/uploads/2024/08/青山-經典茶飲－奶山峰奶茶-1200x1500-1.jpg",
+  "綠水":"https://peak-tea.com/wp-content/uploads/2024/09/青山-經典茶飲－茶綠水-1200x1500-1.jpg",
+  "天蟬紅茶":"https://peak-tea.com/wp-content/uploads/2024/08/青山-經典茶飲－茶天蟬紅茶-1200x1500-1.jpg",
+  "蕎麥奶蓋綠水":"https://peak-tea.com/wp-content/uploads/2024/09/青山-經典茶飲－蓋蕎麥奶蓋綠水1200x1500.jpg",
+  "蕎麥奶蓋玄米茶":"https://peak-tea.com/wp-content/uploads/2024/09/青山-經典茶飲－蓋蕎麥奶蓋玄米茶1200x1500.jpg",
+  "海鹽奶蓋春青":"https://peak-tea.com/wp-content/uploads/2024/08/青山-經典茶飲－蓋海鹽奶蓋春青1200x1500.jpg",
+  "海鹽奶蓋紅茶":"https://peak-tea.com/wp-content/uploads/2024/09/青山-經典茶飲－蓋海鹽奶蓋紅茶1200x1500.jpg",
+  "海鹽奶蓋輕蘋香茶":"https://peak-tea.com/wp-content/uploads/2024/09/青山-經典茶飲－蓋海鹽奶蓋輕蘋香茶1200x1500.jpg",
+  "山峰奶茶":"https://peak-tea.com/wp-content/uploads/2024/08/青山-經典茶飲－奶山峰奶茶-1200x1500-1.jpg",
+  "夏青那堤":"https://peak-tea.com/wp-content/uploads/2024/09/青山-經典茶飲－奶夏青那堤-1200x1500-1.jpg",
+  "蕎麥那堤":"https://peak-tea.com/wp-content/uploads/2024/09/青山-經典茶飲－奶蕎麥那堤-1200x1500-1.jpg",
+  "天蟬那堤":"https://peak-tea.com/wp-content/uploads/2024/09/青山-經典茶飲－奶天蟬那堤-1200x1500-1.jpg",
+  "天蟬燕麥奶":"https://peak-tea.com/wp-content/uploads/2024/08/青山-經典茶飲－奶天蟬燕麥奶-1200x1500-1.jpg",
+  "白甘蔗春青":"https://peak-tea.com/wp-content/uploads/2024/08/青山-經典茶飲－果白甘蔗春青－1200x1500.jpg",
+  "香檸綠水":"https://peak-tea.com/wp-content/uploads/2024/08/青山-經典茶飲－果香檸綠水－1200x1500.jpg",
+  "柳丁綠水":"https://peak-tea.com/wp-content/uploads/2024/09/青山-經典茶飲－果柳丁綠水－1200x1500.jpg",
+  "紅柚綠水":"https://peak-tea.com/wp-content/uploads/2024/09/青山-經典茶飲－果紅柚綠水－1200x1500.jpg",
+  "橘子春青":"https://peak-tea.com/wp-content/uploads/2026/02/橘子春青方.jpg",
+  "荔枝春青":"https://peak-tea.com/wp-content/uploads/2024/09/青山-經典茶飲－果紅柚綠水－1200x1500.jpg",
+  "水梨春青":"https://peak-tea.com/wp-content/uploads/2026/02/青山-水梨春青_方.jpg",
+  "輕蘋香茶":"https://peak-tea.com/wp-content/uploads/2024/08/青山-經典茶飲－果輕蘋香茶－1200x1500.jpg"
+};
+
+function showDrinkImg(name){
+  const box = document.getElementById('drink-img-box');
+  const img = document.getElementById('drink-img');
+  const lbl = document.getElementById('drink-img-label');
+  if(IMG[name]){
+    img.src = IMG[name];
+    lbl.textContent = name;
+    box.style.display = 'block';
+  } else {
+    box.style.display = 'none';
+  }
+}
 const MENU={
   "青":[["春青","花香・輕・800-1200M",30,35],["夏青","木質香・重・800-1200M",30,35],["秋青","奶香・中・1200-1500M",40,45],["冬青","清香・輕・1300-1600M",55,60]],
   "無咖啡因":[["東方菊花茶","",45,55],["西穀蕎麥茶","",30,40],["南非國寶茶","",40,50],["北風桂花玄米茶","",35,45]],
@@ -226,6 +291,7 @@ function updateItems(){
   const cat=document.getElementById('category').value;
   const sel=document.getElementById('item');
   sel.innerHTML='';
+  document.getElementById('drink-img-box').style.display='none';
   if(!cat){sel.innerHTML='<option>── 請先選類別 ──</option>';return;}
   MENU[cat].forEach(([name,note])=>{
     const o=document.createElement('option');
