@@ -368,7 +368,11 @@ async function submitOrder(){
   const btn=document.getElementById('submit-btn');
   btn.disabled=true;btn.textContent='⏳ 送出中...';
   try{
-    const payload=encodeURIComponent(JSON.stringify({orders}));
+    const cleanOrders=orders.map(o=>({...o,
+      sweet:o.sweet.replace(/%/g,''),
+      ice:o.ice.replace(/%/g,'')
+    }));
+    const payload=encodeURIComponent(JSON.stringify({orders:cleanOrders}));
     const url=API_URL+'?data='+payload;
     await submitViaForm(url);
     document.getElementById('submit-btn').style.display='none';
