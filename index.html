@@ -193,7 +193,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC',sans
     <div class="success-banner">
       <div class="icon">🍵</div>
       <p>訂單已成功送出！</p>
-      <small>感謝您的訂購，資料已記錄到統計表<br>請將手機交給下一位同仁填寫</small>
+      <small>感謝您的訂購，資料已記錄到統計表</small>
     </div>
   </div>
 
@@ -323,7 +323,6 @@ function addItem(){
   orders.push({name,item:iname,size,qty,sweet:selectedSweet,ice:selectedIce,extras,note});
   renderOrders();
   document.getElementById('note').value='';
-  document.getElementById('extra-chips').querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
   showToast('已加入清單 ✓');
   document.getElementById('submit-btn').classList.add('ready');
 }
@@ -341,25 +340,11 @@ function renderOrders(){
 function removeOrder(i){orders.splice(i,1);renderOrders();}
 function submitViaForm(url){
   return new Promise(resolve=>{
-    const iframe=document.createElement('iframe');
-    iframe.name='submit-frame-'+Date.now();
-    iframe.style.display='none';
-    document.body.appendChild(iframe);
-    const form=document.createElement('form');
-    form.method='GET';
-    form.action=url;
-    form.target=iframe.name;
-    form.style.display='none';
-    document.body.appendChild(form);
-    iframe.onload=()=>{
-      setTimeout(()=>{
-        document.body.removeChild(iframe);
-        document.body.removeChild(form);
-      },3000);
-      resolve();
-    };
-    form.submit();
-    setTimeout(resolve,3000);
+    const img=new Image();
+    img.onload=()=>resolve();
+    img.onerror=()=>resolve();
+    img.src=url+'&t='+Date.now();
+    setTimeout(resolve,4000);
   });
 }
 
