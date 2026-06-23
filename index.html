@@ -75,7 +75,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC',sans
     <div class="hero-sub">青茶專業製作</div>
     <div class="hero-divider"></div>
     <div class="hero-company">竹建瓦斯股份有限公司</div>
-    <div class="hero-title">6/24下午茶登記表</div>
+    <div class="hero-title">下午茶訂購登記表</div>
   </div>
 </div>
 
@@ -320,7 +320,9 @@ function addItem(){
   if((size==='M'&&pm===0)||(size==='L'&&pl===0)){showToast('此品項不提供 '+size+' 尺寸','error');return;}
   const extras=getExtras();
   const note=document.getElementById('note').value.trim();
-  orders.push({name,item:iname,size,qty,sweet:selectedSweet,ice:selectedIce,extras,note});
+  const extraCost=extras.reduce((s,e)=>{const m=e.match(/\+(\d+)/);return s+(m?parseInt(m[1]):0);},0);
+  const totalPrice=(basePrice+extraCost)*qty;
+  orders.push({name,item:iname,size,qty,sweet:selectedSweet,ice:selectedIce,extras,note,price:totalPrice});
   renderOrders();
   document.getElementById('note').value='';
   showToast('已加入清單 ✓');
@@ -333,7 +335,7 @@ function renderOrders(){
   el.innerHTML=orders.map((o,i)=>`
     <div class="order-item">
       <button class="del" onclick="removeOrder(${i})">×</button>
-      <div class="order-summary">${o.name}・${o.item} ${o.size} ×${o.qty}</div>
+      <div class="order-summary">${o.name}・${o.item} ${o.size} ×${o.qty}<span style="float:right;color:#6b8c5a;font-size:13px">NT$${o.price||0}</span></div>
       <div class="order-meta">甜度：${o.sweet}　冰塊：${o.ice}${o.extras.length?'　加料：'+o.extras.join('、'):''}${o.note?'　備註：'+o.note:''}</div>
     </div>`).join('');
 }
@@ -345,7 +347,8 @@ async function submitOrder(){
   try{
     const cleanOrders=orders.map(o=>({...o,
       sweet:o.sweet.replace(/%/g,''),
-      ice:o.ice.replace(/%/g,'')
+      ice:o.ice.replace(/%/g,''),
+      price:o.price||0
     }));
     const jsonStr=JSON.stringify({orders:cleanOrders});
     const payload=encodeURIComponent(jsonStr);
