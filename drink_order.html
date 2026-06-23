@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>竹建瓦斯 下午茶登記表</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC',sans-serif;background:#f4f6f4;color:#1a1a1a;min-height:100vh;padding:1.5rem 1rem}
+.container{max-width:540px;margin:0 auto}
+h1{font-size:20px;font-weight:600;color:#0F6E56;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+h1 span{font-size:22px}
+.sub{font-size:13px;color:#666;margin-bottom:1.25rem}
+.card{background:#fff;border:1px solid #e0e8e4;border-radius:14px;padding:1rem 1.25rem;margin-bottom:1rem;box-shadow:0 1px 4px rgba(0,100,60,.05)}
+.card-title{font-size:12px;font-weight:600;color:#0F6E56;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+.field{margin-bottom:10px}
+.field label{display:block;font-size:13px;color:#555;margin-bottom:4px;font-weight:500}
+.field input,.field select,.field textarea{width:100%;padding:8px 11px;font-size:14px;border:1px solid #d0dbd6;border-radius:9px;background:#fff;color:#1a1a1a;outline:none;transition:border .15s}
+.field input:focus,.field select:focus{border-color:#1D9E75}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.section-label{font-size:11px;font-weight:600;color:#888;letter-spacing:.05em;margin:12px 0 6px;text-transform:uppercase}
+.chip-group{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:6px 13px;font-size:13px;border:1px solid #c8d8d2;border-radius:20px;cursor:pointer;background:#fff;color:#444;transition:all .15s;user-select:none}
+.chip.active{background:#1D9E75;border-color:#1D9E75;color:#fff;font-weight:500}
+.chip:hover:not(.active){background:#f0faf6;border-color:#1D9E75}
+.add-btn{width:100%;padding:10px;font-size:14px;border:1.5px dashed #b0ccc4;border-radius:10px;background:transparent;color:#0F6E56;cursor:pointer;margin-top:10px;font-weight:500;transition:background .15s}
+.add-btn:hover{background:#f0faf6}
+.order-item{background:#f7fbf9;border:1px solid #d8ece5;border-radius:10px;padding:10px 40px 10px 12px;margin-bottom:8px;position:relative}
+.order-item .del{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:#fee;border:none;border-radius:50%;width:24px;height:24px;color:#c0392b;cursor:pointer;font-size:16px;line-height:24px;text-align:center;padding:0}
+.order-item .del:hover{background:#fcc}
+.order-summary{font-size:14px;font-weight:500;color:#1a1a1a}
+.order-meta{font-size:12px;color:#666;margin-top:3px;line-height:1.5}
+.submit-btn{width:100%;padding:13px;font-size:16px;font-weight:600;background:#1D9E75;border:none;border-radius:12px;color:#fff;cursor:pointer;letter-spacing:.03em;transition:background .15s}
+.submit-btn:hover{background:#0F6E56}
+.submit-btn:disabled{background:#aaa;cursor:default}
+.empty{text-align:center;padding:20px;color:#aaa;font-size:13px}
+.badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;background:#E1F5EE;color:#0F6E56;font-weight:600;margin-left:6px}
+.result-card{background:#fff;border:1px solid #d0e8dd;border-radius:14px;padding:1.25rem;margin-top:1rem}
+.result-text{font-size:13px;color:#222;white-space:pre-wrap;line-height:1.9;background:#f7fbf9;border-radius:10px;padding:1rem;border:1px solid #d8ece5;font-family:'Courier New',monospace}
+.copy-btn{width:100%;padding:10px;font-size:14px;border:1px solid #1D9E75;border-radius:10px;background:transparent;color:#1D9E75;cursor:pointer;margin-top:10px;font-weight:500;transition:all .15s}
+.copy-btn:hover{background:#1D9E75;color:#fff}
+.divider{border:none;border-top:1px solid #e8f0ec;margin:1rem 0}
+.count-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.note-hint{font-size:11px;color:#aaa;margin-top:3px}
+@media(max-width:400px){.row2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1><span>🍵</span> 竹建瓦斯 下午茶登記表</h1>
+  <p class="sub">請填寫您的姓名與飲品需求，完成後點「加入訂單」，所有人填完後由收單人按送出統計。</p>
+
+  <div class="card">
+    <div class="card-title">📋 訂購人資訊</div>
+    <div class="field">
+      <label>姓名</label>
+      <input type="text" id="name" placeholder="請輸入您的姓名">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🧋 選擇飲品</div>
+    <div class="field">
+      <label>飲品類別</label>
+      <select id="category" onchange="updateItems()">
+        <option value="">-- 選擇類別 --</option>
+        <option value="青">青（高山茶）</option>
+        <option value="無咖啡因">無咖啡因</option>
+        <option value="調">調（冬露系列）</option>
+        <option value="料">料</option>
+        <option value="茶">茶</option>
+        <option value="蓋">蓋（奶蓋系列）</option>
+        <option value="奶">奶</option>
+        <option value="果">果</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>飲品名稱</label>
+      <select id="item"><option>-- 請先選類別 --</option></select>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>尺寸</label>
+        <select id="size"><option value="M">M</option><option value="L">L</option></select>
+      </div>
+      <div class="field">
+        <label>數量</label>
+        <select id="qty"><option>1</option><option>2</option><option>3</option></select>
+      </div>
+    </div>
+
+    <div class="section-label">甜度</div>
+    <div class="chip-group" id="sweet-chips">
+      <span class="chip" onclick="pick(this,'sweet')">正常 100%</span>
+      <span class="chip" onclick="pick(this,'sweet')">少糖 70%</span>
+      <span class="chip active" onclick="pick(this,'sweet')">半糖 50%</span>
+      <span class="chip" onclick="pick(this,'sweet')">微糖 30%</span>
+      <span class="chip" onclick="pick(this,'sweet')">1分糖 10%</span>
+      <span class="chip" onclick="pick(this,'sweet')">無糖 0%</span>
+    </div>
+
+    <div class="section-label" style="margin-top:14px">冰塊</div>
+    <div class="chip-group" id="ice-chips">
+      <span class="chip" onclick="pick(this,'ice')">正常冰 100%</span>
+      <span class="chip" onclick="pick(this,'ice')">少冰 70%</span>
+      <span class="chip active" onclick="pick(this,'ice')">微冰 30%</span>
+      <span class="chip" onclick="pick(this,'ice')">去冰 0%</span>
+      <span class="chip" onclick="pick(this,'ice')">常溫</span>
+      <span class="chip" onclick="pick(this,'ice')">溫熱</span>
+    </div>
+
+    <div class="section-label" style="margin-top:14px">加料（可複選）</div>
+    <div class="chip-group" id="extra-chips">
+      <span class="chip" onclick="toggle(this)">+10 琥珀珍珠</span>
+      <span class="chip" onclick="toggle(this)">+15 蕎麥珍珠</span>
+      <span class="chip" onclick="toggle(this)">+20 海鹽奶蓋</span>
+      <span class="chip" onclick="toggle(this)">+20 蕎麥奶蓋</span>
+      <span class="chip" onclick="toggle(this)">+10 菜燕</span>
+      <span class="chip" onclick="toggle(this)">+10 青茶茶凍</span>
+      <span class="chip" onclick="toggle(this)">+10 青茶婚貴</span>
+      <span class="chip" onclick="toggle(this)">+10 杏仁凍</span>
+    </div>
+
+    <div class="field" style="margin-top:14px">
+      <label>備註</label>
+      <input type="text" id="note" placeholder="其他特別需求（選填）">
+      <div class="note-hint">例如：不要加冰塊、少冰、對某食材過敏…</div>
+    </div>
+
+    <button class="add-btn" onclick="addItem()">＋ 加入訂單</button>
+  </div>
+
+  <div class="card">
+    <div class="count-row">
+      <div class="card-title" style="margin-bottom:0">🛒 目前訂單 <span id="count-badge" class="badge">0 筆</span></div>
+    </div>
+    <div id="order-list"><div class="empty">尚未加入任何品項</div></div>
+  </div>
+
+  <button class="submit-btn" onclick="submitOrder()">📊 送出並產生統計文字</button>
+
+  <div id="result-area" style="display:none;margin-top:1rem">
+    <div class="result-card">
+      <div class="card-title">📋 統計結果（複製後貼到 LINE / Excel）</div>
+      <div class="result-text" id="result-text"></div>
+      <button class="copy-btn" onclick="copyResult()">📋 複製全部文字</button>
+    </div>
+    <div style="text-align:center;margin-top:12px">
+      <button style="padding:8px 20px;font-size:13px;border:1px solid #ccc;border-radius:8px;background:#fff;color:#666;cursor:pointer" onclick="resetAll()">🔄 清除全部重新填寫</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const MENU = {
+  "青":[["春青","花香・輕・800-1200M",30,35],["夏青","木質香・重・800-1200M",30,35],["秋青","奶香・中・1200-1500M",40,45],["冬青","清香・輕・1300-1600M",55,60]],
+  "無咖啡因":[["東方菊花茶","",45,55],["西穀蕎麥茶","",30,40],["南非國寶茶","",40,50],["北風桂花玄米茶","",35,45]],
+  "調":[["青山綠水","",35,40],["春青菊花","",45,55],["蕎麥冬露","僅L",0,50],["春青冬露","僅L",0,50],["菊花冬露","僅L",0,55],["多多綠水","僅L",0,55]],
+  "料":[["菜燕春青","",40,45],["菜燕奶茶","",55,60],["杏仁凍春青","",40,45],["青茶婚貴奶茶","",55,60],["琥珀珍珠奶茶","",55,60],["蕎麥珍珠奶茶","",60,65],["青茶凍天蟬那堤","",65,75],["琥珀珍珠天蟬那堤","",65,75],["蕎麥珍珠夏青那堤","",65,75]],
+  "茶":[["綠水","",25,30],["天蟬紅茶","",35,40]],
+  "蓋":[["蕎麥奶蓋綠水","",45,50],["蕎麥奶蓋玄米茶","",55,65],["海鹽奶蓋春青","",50,55],["海鹽奶蓋紅茶","",55,60],["海鹽奶蓋輕蘋香茶","僅M",80,0]],
+  "奶":[["山峰奶茶","",45,50],["夏青那堤","",50,60],["蕎麥那堤","",50,65],["天蟬那堤","",55,65],["天蟬燕麥奶","",65,80]],
+  "果":[["白甘蔗春青","",55,60],["香檸綠水","",55,60],["柳丁綠水","",65,70],["紅柚綠水","",65,70],["橘子春青","",65,70],["荔枝春青","含青茶凍",70,75],["水梨春青","",70,75],["輕蘋香茶","",75,80]]
+};
+
+let selectedSweet="半糖 50%", selectedIce="微冰 30%";
+const orders=[];
+
+function updateItems(){
+  const cat=document.getElementById('category').value;
+  const sel=document.getElementById('item');
+  sel.innerHTML='';
+  if(!cat){sel.innerHTML='<option>-- 請先選類別 --</option>';return;}
+  MENU[cat].forEach(([name,note,pm,pl])=>{
+    const o=document.createElement('option');
+    o.value=JSON.stringify([name,note,pm,pl]);
+    o.textContent=name+(note?' ('+note+')':'');
+    sel.appendChild(o);
+  });
+}
+
+function pick(el,type){
+  const group=type==='sweet'?'sweet-chips':'ice-chips';
+  document.getElementById(group).querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  if(type==='sweet') selectedSweet=el.textContent;
+  else selectedIce=el.textContent;
+}
+
+function toggle(el){el.classList.toggle('active');}
+
+function getExtras(){
+  return [...document.getElementById('extra-chips').querySelectorAll('.chip.active')].map(c=>c.textContent);
+}
+
+function addItem(){
+  const name=document.getElementById('name').value.trim();
+  const itemVal=document.getElementById('item').value;
+  if(!name){alert('請填寫姓名');return;}
+  if(!itemVal||itemVal.startsWith('--')){alert('請選擇飲品');return;}
+  const [iname,inote,pm,pl]=JSON.parse(itemVal);
+  const size=document.getElementById('size').value;
+  const qty=parseInt(document.getElementById('qty').value);
+  const basePrice=size==='M'?pm:pl;
+  if(basePrice===0){alert('此品項不提供 '+size+' 尺寸，請重新選擇。');return;}
+  const price=basePrice*qty;
+  const extras=getExtras();
+  const note=document.getElementById('note').value.trim();
+  orders.push({name,item:iname,size,qty,sweet:selectedSweet,ice:selectedIce,extras,note,price});
+  renderOrders();
+  document.getElementById('note').value='';
+  document.getElementById('extra-chips').querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  document.getElementById('item').selectedIndex=0;
+  window.scrollTo({top:document.getElementById('order-list').offsetTop-20,behavior:'smooth'});
+}
+
+function renderOrders(){
+  const el=document.getElementById('order-list');
+  document.getElementById('count-badge').textContent=orders.length+' 筆';
+  if(!orders.length){el.innerHTML='<div class="empty">尚未加入任何品項</div>';return;}
+  el.innerHTML=orders.map((o,i)=>`
+    <div class="order-item">
+      <button class="del" onclick="removeOrder(${i})" aria-label="刪除此項目">×</button>
+      <div class="order-summary">${o.name}・${o.item} ${o.size} ×${o.qty}</div>
+      <div class="order-meta">甜度：${o.sweet}　冰塊：${o.ice}${o.extras.length?'　加料：'+o.extras.join('、'):''}${o.note?'　備註：'+o.note:''}</div>
+    </div>`).join('');
+}
+
+function removeOrder(i){orders.splice(i,1);renderOrders();}
+
+function submitOrder(){
+  if(!orders.length){alert('訂單是空的，請先加入品項！');return;}
+  const now=new Date();
+  const timeStr=now.getFullYear()+'/'+(now.getMonth()+1)+'/'+(now.getDate())+' '
+    +now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  const summary={};
+  let total=0;
+  orders.forEach(o=>{
+    const key=`${o.item} ${o.size}`;
+    summary[key]=(summary[key]||0)+o.qty;
+    total+=o.price;
+  });
+  let text='🍵 竹建瓦斯 下午茶登記表\n';
+  text+='統計時間：'+timeStr+'\n';
+  text+='─'.repeat(30)+'\n\n';
+  text+='【個人訂單明細】\n';
+  orders.forEach((o,i)=>{
+    text+=`${i+1}. ${o.name}：${o.item} ${o.size} ×${o.qty}\n`;
+    text+=`   甜度：${o.sweet}　冰塊：${o.ice}\n`;
+    if(o.extras.length) text+=`   加料：${o.extras.join('、')}\n`;
+    if(o.note) text+=`   備註：${o.note}\n`;
+    text+='\n';
+  });
+  text+='─'.repeat(30)+'\n';
+  text+='【品項彙整（交給店員下單用）】\n';
+  Object.entries(summary).forEach(([k,v])=>text+=`・${k}  ×${v}\n`);
+  text+='\n合計飲品費約 NT$ '+total+'（不含加料費用）\n';
+  text+='共 '+orders.length+' 杯，'+[...new Set(orders.map(o=>o.name))].length+' 位同仁';
+  document.getElementById('result-text').textContent=text;
+  document.getElementById('result-area').style.display='block';
+  setTimeout(()=>document.getElementById('result-area').scrollIntoView({behavior:'smooth'}),100);
+}
+
+function copyResult(){
+  const t=document.getElementById('result-text').textContent;
+  navigator.clipboard.writeText(t).then(()=>{
+    const btn=document.querySelector('.copy-btn');
+    btn.textContent='✅ 已複製！';
+    setTimeout(()=>btn.textContent='📋 複製全部文字',2000);
+  }).catch(()=>{
+    const el=document.getElementById('result-text');
+    const range=document.createRange();
+    range.selectNode(el);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    document.execCommand('copy');
+    alert('已複製到剪貼簿！');
+  });
+}
+
+function resetAll(){
+  if(confirm('確定要清除所有訂單重新開始嗎？')){
+    orders.length=0;
+    renderOrders();
+    document.getElementById('result-area').style.display='none';
+    document.getElementById('name').value='';
+    document.getElementById('category').value='';
+    document.getElementById('item').innerHTML='<option>-- 請先選類別 --</option>';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+}
+</script>
+</body>
+</html>
